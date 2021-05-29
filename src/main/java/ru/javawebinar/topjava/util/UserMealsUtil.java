@@ -6,11 +6,12 @@ import ru.javawebinar.topjava.model.UserMealWithExcess;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.javawebinar.topjava.util.TimeUtil.isBetweenHalfOpen;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -36,10 +37,9 @@ public class UserMealsUtil {
 
         // если данные поступают из ненадёжного источника, надо выполнить валидацию аргументов
 
-        for (UserMeal meal:meals){
-            LocalTime mealTime = meal.getDateTime().toLocalTime();
-            if (!mealTime.isBefore(startTime) && !mealTime.isAfter(endTime) && meal.getCalories() <= caloriesPerDay) {
-                res.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), false ));
+        for (UserMeal meal : meals) {
+            if (isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime) && meal.getCalories() <= caloriesPerDay) {
+                res.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), false));
             }
         }
 
@@ -51,10 +51,10 @@ public class UserMealsUtil {
         // Implement by streams
 
         List<UserMealWithExcess> res = meals.stream()
-                .filter(meal -> {
-                    LocalTime mealTime = meal.getDateTime().toLocalTime();
-                    return !mealTime.isBefore(startTime) && !mealTime.isAfter(endTime) && meal.getCalories() <= caloriesPerDay;
-                })
+                .filter(meal ->
+                        isBetweenHalfOpen(meal.getDateTime().toLocalTime(), startTime, endTime)
+                                && meal.getCalories() <= caloriesPerDay
+                )
                 .map(meal -> new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), false))
                 .collect(Collectors.toList());
 
